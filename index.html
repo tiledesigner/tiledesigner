@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <title>Tile Maker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+  </head>
+<body>
+  <div class="container">
+    <div id="Intro">
+  <h1>Tile Maker</h1>
+  <p>This page is a tile maker - to create tiles for videogames.</p>
+   <p>At the moment, this is compatible with <a href="https://puzzlescript.net">puzzlescript</a>.</p>
+  <p>Click on each individual pixel in the tile board below to assign the chosen colour. Click again to recover the previous colour.</p>
+</div>
+    <div id="TileMaker" class="row">
+    <div id="TileDrawer" class="col">
+     <canvas id="TileEditor" onmousedown="canvas.ClickTile(event)" width="300" height="300" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+    </div>
+    <div id="Parameters" class="col">
+       <h3>Pick a colour:</h3>
+        <input id="ColorPicker" value="#A3EFA3" type="color" >
+        <input id="ColorTransparency" type="checkbox" >
+    
+    <div class="row">
+      <button id="UndoB" type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
+       <button id="RedoB" type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
+
+
+      
+      <div class="input-group">
+        <span class="input-group-btn">
+          <button id="UpdateB" onclick="canvas.ChangeBoardSize()" class="btn btn-secondary" type="button">Change Board Size</button>
+      </span>
+      <input type="number" id="Nsquares" name="Range" value="5" min="0" max="100" class="form-control">
+    </div>
+
+      <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
+      <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+    </div>
+    </div>
+  </div>
+    <div id="Footer">
+      <h2>Credits</h2>
+      <p>Last version: November 2017.</p>
+      <p> Programmed in HTML and Javascript within <a href="https://repl.it/">repl</a>, styled with the <a href="https://getbootstrap.com">Bootstrap library</a>.</p>
+    </div>
+  </div>
+
+
+
+<!-- Export menu -->
+<div class="modal fade" id="ExportMenu" tabindex="-1" role="dialog" aria-labelledby="ExportMenuLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ExportMenuLabel">Export</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="PrintedBoard"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+
+
+<script src="index.js"></script>
+<script src="test.js"></script>
+
+</body>
+</html>
