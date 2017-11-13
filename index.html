@@ -14,7 +14,7 @@
     <div id="Intro">
   <h1>Tile Maker</h1>
   <p>This page is a tile maker - to create tiles for videogames.</p>
-   <p>At the moment, this is compatible with <a href="https://puzzlescript.net">puzzlescript</a>.</p>
+   <p>At the moment, this is compatible with <a href="https://www.puzzlescript.net">puzzlescript</a>.</p>
   <p>Click on each individual pixel in the tile board below to assign the chosen colour. Click again to recover the previous colour.</p>
 </div>
     <div id="TileMaker" class="row">
@@ -28,11 +28,15 @@
         <input id="ColorTransparency" type="checkbox" >
     
     <div class="row">
-      <button id="UndoB" type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
-       <button id="RedoB" type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
+      <button type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
+      <button type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
+
+<button type="button" class="btn btn-info" onclick="canvas.MatrixFlipHorizontal()">Flip Horizontal</button>
+<button type="button" class="btn btn-info" onclick="canvas.MatrixFlipVertical()">Flip Vertical</button>
+<button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorHorizontal()">Mirror Horizontal</button>
+<button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorVertical()">Mirror Vertical</button>
 
 
-      
       <div class="input-group">
         <span class="input-group-btn">
           <button id="UpdateB" onclick="canvas.ChangeBoardSize()" class="btn btn-secondary" type="button">Change Board Size</button>
@@ -42,9 +46,16 @@
 
       <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
       <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+      </div>
+      </div>
     </div>
+  
+    <div id="TileSet">
+      <h2>Tile set</h2>
+      <div></div>
+     
     </div>
-  </div>
+    
     <div id="Footer">
       <h2>Credits</h2>
       <p>Last version: November 2017.</p>
@@ -67,6 +78,9 @@
       <div class="modal-body">
         <pre><code id="PrintedBoard"></code></pre>
       </div>
+      <div class="modal-body">
+        <img id="ImagedBoard">
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Copy</button>
@@ -74,6 +88,28 @@
     </div>
   </div>
 </div>
+
+<!-- Colour Palette menu
+<div class="modal fade" id="PaletteMenu" tabindex="-1" role="dialog" aria-labelledby="PaletteMenuLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PaletteMenuLabel">Export</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code id="PrintedBoard"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+-->
 
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

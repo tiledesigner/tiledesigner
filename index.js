@@ -3,7 +3,7 @@ function Canvas(id){
   var ctx = c.getContext("2d");
   this.context=ctx;
   
-  /*** Basic Functions***/
+  /*** Basic Array Functions***/
   
   function ArrayCopy(array){
     if(typeof(array)!="object"){
@@ -31,8 +31,7 @@ function Canvas(id){
       }
       return test;
     }
-  
-  /*** Tile Board functions ***/
+  /*** Tile Board (Canvas) functions ***/
 
   this.AskSize=function(){
     return Number(document.getElementById("Nsquares").value)};
@@ -110,28 +109,30 @@ function Canvas(id){
   };
   
   this.ClickTile= function(event){
-    this.UndoCapture();
     var l=this.AskSizeL();
     var x =event.offsetX;
     var y =event.offsetY;
     x=1+(x-x%l)/l;
     y=1+(y-y%l)/l;
     this.UpdateTile(x,y,this.AskColor());
+    this.UndoCapture();
   return this;
   };
   
   this.PrintBoard=function(){
     document.getElementById("PrintedBoard").innerHTML = this.MatrixParse();
+    document.getElementById("ImagedBoard").src = this.MatrixImage();
+
   };
   
   this.ClearBoard=function(){
-    this.UndoCapture();
     var size=this.MatrixSize();
     for(var i=1;i<=size;i++){
       for(var j=1;j<=size;j++){
         this.UpdateTile(i,j,"transparent");
       }
     }
+    this.UndoCapture();
     return this;
   };
 
@@ -147,9 +148,9 @@ function Canvas(id){
   };
   
   this.ChangeBoardSize=function(){
-    this.UndoCapture();
     this.MatrixResize();
     this.UpdateBoard();
+    this.UndoCapture();
     return this;  
   };
   
@@ -158,7 +159,7 @@ function Canvas(id){
   this.EditDisable=function(){this.Editable=false}
   this.EditEnable=function(){this.Editable=true}
   */
-  /*** Undo Redo***/
+  /*** Undo & Redo***/
 
   this.UndoCapture=function(){
     if(this.UndoQueueIndex==this.UndoQueue.length-1){
@@ -166,7 +167,7 @@ function Canvas(id){
       this.UndoQueueIndex++;
     }
     else{
-      while(this.UndoQueue.length-1>this.UndoQueueIndex){
+      while(this.UndoQueueIndex<this.UndoQueue.length-1){
         this.UndoQueue.pop();
       }
       this.UndoCapture();
@@ -176,22 +177,21 @@ function Canvas(id){
   
   this.Undo=function(){
     if(this.UndoQueueIndex>=1){
-    this.Matrix=ArrayCopy(this.UndoQueue[this.UndoQueueIndex-1]);
     this.UndoQueueIndex--
+    this.Matrix=ArrayCopy(this.UndoQueue[this.UndoQueueIndex]);
     this.UpdateBoard();
-    return this;
-    }
+    };
+        return this;
   };
   
    this.Redo=function(){
     if(this.UndoQueueIndex<this.UndoQueue.length-1){
-    this.Matrix=ArrayCopy(this.UndoQueue[this.UndoQueueIndex+1]);
-    this.UndoQueueIndex++;
-    this.UpdateBoard();
-    return this;
-    }
+      this.UndoQueueIndex++;
+      this.Matrix=ArrayCopy(this.UndoQueue[this.UndoQueueIndex]);
+      this.UpdateBoard();
+    };
+        return this;
   };
-
   /*** Matrix functions ***/
 
   this.MatrixSize=function(){return this.Matrix.length};
@@ -210,13 +210,20 @@ function Canvas(id){
         return datamatrix;
       }
       this.Matrix=NewMatrix();
-      
       this.UndoQueue=[ArrayCopy(this.Matrix)];
       this.UndoQueueIndex=0;
+      this.ClearBoard();
 
       return this;
     };
-
+  
+  
+  this.MatrixLoad=function(matrix){
+    this.Matrix=ArrayCopy(matrix);
+    this.UpdateBoard();
+    this.UndoCapture();
+  }
+  
   this.MatrixResize=function(){
       var m=this.Matrix;
       var oldsize=this.MatrixSize();
@@ -277,15 +284,80 @@ function Canvas(id){
       text=text+colorlist.join(" ")+"\n"+n;
     return(text);
     };
+  /*** Matrix Transformations ***/
     
-  /*** Color lists***/
+    this.MatrixFlipHorizontal=function(){
+      m=ArrayCopy(this.Matrix);
+      for (i in m){m[i].reverse();}
+      this.MatrixLoad(m);
+      return(this)
+    }
+    
+    this.MatrixFlipVertical=function(){
+      m=ArrayCopy(this.Matrix);
+      m.reverse();
+      this.MatrixLoad(m);
+      return(this)
+    }
+    
+    this.MatrixMirrorVertical=function(){
+      m=ArrayCopy(this.Matrix);
+      var l=m[0].length;
+      for(var i in m){for(var j in m[i]){m[i][j]=m[i][l-1-j]}}
+      this.MatrixLoad(m);
+      return(this)
+    }
+    
+    this.MatrixMirrorHorizontal=function(){
+      m=ArrayCopy(this.Matrix);
+      var l=m.length;
+      for(var i in m){m[i]=m[l-1-i]}
+      this.MatrixLoad(m);
+      return(this)
+    }
+  /* Color lists
+  this.ColourList={
+    tile:[],
+    tileset:[],
+    hue:[],
+    saturation:[],
+    brightness:[]
+  };
   
-  /******/  
+  UpdateColourList=function(){
+    colours=this.Matrix
+    
+  }
+  
+
+  Tile Set
+  
+  this.SaveTile=function(){
+    this.TilesetAppend(this.Matrix);
+    this.TilesetUpdate();
+    return this;
+  }
+  
+  this.Tileset=[];
+  this.TileIndex=0;
+  */
+  
+  this.MatrixImage=function() {
+	  var image = new Image();
+	  image.src = c.toDataURL("image/png");
+	  return image;
+  }
+  
+  /*this.TilesetUpdate=function(){
+    this.Tileset.push(this.Matrix);
+    TileCard(this.Matrix);
+    return this;
+  };*/
+  
   this.MatrixReset();
 
 }
 
 var canvas=new Canvas("TileEditor");
-canvas.ClearBoard().UpdateTile(2,3,"orange")
 
 
