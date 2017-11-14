@@ -31,6 +31,52 @@ function Canvas(id){
       }
       return test;
     }
+    
+  function MatrixMap(matrix,f){
+    var m=ArrayCopy(matrix);
+    for(i in m){for (j in m[i]){m[i][j]=f(m[i][j])}}
+    return m;
+  }
+
+  function Fold(fu,ar){
+  
+  if(ar.length===1){
+    return ar[0];
+  }
+  else{
+    var FoldR=function(f,arra,result){
+      if(arra.length<=0){
+        return result;
+      }
+      else{
+        var z=arra[0];
+        var arr=arra;
+        arr.shift();
+        return FoldR(f,arr,f(result,z));
+  }};
+  
+  var a=ar;
+  u=a[0];
+  a.shift();
+  return FoldR(fu,a,u);
+  }
+}
+
+  function ReplaceRe(text,token,instructions){
+    var t=text;
+    var tr=t.replace(token,instructions);
+    while(tr!=t){
+      t=tr;
+      tr=tr.replace(token,instructions);
+    }
+  return tr;
+  }
+
+  function ReplaceReLi(text,tokeninstructionspairs){
+    return Fold(
+        function(x,y){return ReplaceRe(x,y[0],y[1])},
+        [text].concat(tokeninstructionspairs));
+  }
   /*** Tile Board (Canvas) functions ***/
 
   this.AskSize=function(){
@@ -49,6 +95,17 @@ function Canvas(id){
         return "transparent";
       }
       else return document.getElementById("ColorPicker").value;
+  };
+  
+  this.SetColor=function(color){
+    if(color==="transparent"){
+      document.getElementById("ColorTransparency").checked=true;
+    }
+    else{
+      document.getElementById("ColorTransparency").checked=false;
+      document.getElementById("ColorPicker").value=color;
+    }
+    return this;
   };
   
   this.DrawSquare = function(xc,yc,l,style){
@@ -115,6 +172,7 @@ function Canvas(id){
     x=1+(x-x%l)/l;
     y=1+(y-y%l)/l;
     this.UpdateTile(x,y,this.AskColor());
+    this.ColorCapture();
     this.UndoCapture();
   return this;
   };
@@ -132,6 +190,7 @@ function Canvas(id){
         this.UpdateTile(i,j,"transparent");
       }
     }
+    this.palette.tile=[];
     this.UndoCapture();
     return this;
   };
@@ -144,6 +203,7 @@ function Canvas(id){
         this.UpdateTile(i,j,this.MatrixRead(i,j));
       }
     }
+    this.MatrixColorsCapture();
     return this;
   };
   
@@ -315,22 +375,125 @@ function Canvas(id){
       this.MatrixLoad(m);
       return(this)
     }
-  /* Color lists
-  this.ColourList={
-    tile:[],
-    tileset:[],
-    hue:[],
-    saturation:[],
-    brightness:[]
+  /*** Color functions ***/
+  
+  HexToRGB=function(fullhex){
+  var HexToNumber=function(hex){
+    var key=[["A","10"],["B","11"],["C","12"],["D","13"],["E","14"],["F","15"]];
+    return Number(ReplaceReLi(hex[0],key))*16+Number(ReplaceReLi(hex[1],key));
+    }
+  var hex=fullhex.replace("#","");
+  var color =[HexToNumber(hex[0]+hex[1]),
+    HexToNumber(hex[2]+hex[3]),
+    HexToNumber(hex[4]+hex[5])]
+  return color;
+};
+  
+  RGBtoHex=function(rgb){
+  var NumberToHex=function(n){
+    var key=[["10","A"],["11","B"],["12","C"],["13","D"],["14","E"],["15","F"]];
+    return ReplaceReLi(String(Math.floor(n/16)),key)+ReplaceReLi(String(n%16),key);
+  }
+  var r=Math.round(rgb[0]);g=Math.round(rgb[1]);b=Math.round(rgb[2]);
+  return "#"+NumberToHex(r)+NumberToHex(g)+NumberToHex(b)
+};
+  
+  RGBtoHSV=function(rgb){
+  var r=rgb[0]/255;
+  var g=rgb[1]/255;
+  var b=rgb[2]/255;
+
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, v = max;
+
+  var d = max - min;
+  s = max === 0 ? 0 : d / max;
+
+  if (max == min) {
+    h = 0; // achromatic
+  } else {
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  return [ h, s, v ];
+};
+
+  HSVtoRGB=function(hsv){
+  var r, g, b;
+  var h=hsv[0]; s=hsv[1]; v=hsv[2];
+
+  var i = Math.floor(h * 6);
+  var f = h * 6 - i;
+  var p = v * (1 - s);
+  var q = v * (1 - f * s);
+  var t = v * (1 - (1 - f) * s);
+
+  switch (i % 6) {
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
+
+  return [ r * 255, g * 255, b * 255 ];
+};
+
+  Saturate=function(rgbhex,percent){
+  var hsv= RGBtoHSV(HexToRGB(rgbhex));
+  return RGBtoHex(HSVtoRGB([hsv[0],Math.min(hsv[1]*percent,1),hsv[2]]));
+};
+
+  Colorise=function(rgbhex,percent){
+  var hsv= RGBtoHSV(HexToRGB(rgbhex));
+  return RGBtoHex(HSVtoRGB([Math.min(hsv[0]*percent,255),hsv[1],hsv[2]]));
+};
+
+  Brighten=function(rgbhex,percent){
+  var hsv= RGBtoHSV(HexToRGB(rgbhex));
+  return RGBtoHex(HSVtoRGB([hsv[0],hsv[1],Math.min(hsv[2]*percent,1)]));
+};
+  /*** Pallettes***/
+    this.palette={
+      "tile":[],
+      "last":[],
+      "tileset":[]
+    };
+  
+  this.ColorSave=function(colour,targetlist){
+      if(colour!="transparent"&&this.palette[targetlist].indexOf(colour)===-1){
+        this.palette[targetlist].push(colour);
+        var h=document.getElementById("palette"+targetlist).innerHTML;
+        document.getElementById("palette"+targetlist).innerHTML=h+this.ColorCardHTML(colour);
+      };
+      return this;
+    };
+
+  this.MatrixColorsCapture=function(){
+    this.palette["tile"]=[];
+    MatrixMap(this.Matrix,function(x){
+      this.ColorSave(x,"tile");
+      this.ColorSave(x,"tileset");
+    })
+    return this;
   };
   
-  UpdateColourList=function(){
-    colours=this.Matrix
-    
+  this.ColorCapture=function(){
+    this.ColorSave(this.AskColor(),"last");
   }
   
-
-  Tile Set
+  this.ColorCardHTML=function(color){
+   return '<div class="card col" style="height:4rem;background-color:'+color+'" onclick="canvas.SetColor(\''+color+'\')"><div class="card-img-top" src="none" alt=" "></div><div class="card-block"><h4 class="card-title">'+color+'</h4> </div></div>'
+  }
+  /*** Tile Set**/
+  /*Tile Set
   
   this.SaveTile=function(){
     this.TilesetAppend(this.Matrix);
@@ -340,7 +503,7 @@ function Canvas(id){
   
   this.Tileset=[];
   this.TileIndex=0;
-  */
+  
   
   this.MatrixImage=function() {
 	  var image = new Image();
@@ -348,7 +511,7 @@ function Canvas(id){
 	  return image;
   }
   
-  /*this.TilesetUpdate=function(){
+  this.TilesetUpdate=function(){
     this.Tileset.push(this.Matrix);
     TileCard(this.Matrix);
     return this;

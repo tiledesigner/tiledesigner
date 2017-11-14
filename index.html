@@ -46,6 +46,10 @@
 
       <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
       <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+      
+      <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#PaletteMenu">Palette</button>
+
+      
       </div>
       </div>
     </div>
@@ -89,27 +93,30 @@
   </div>
 </div>
 
-<!-- Colour Palette menu
+<!-- Colour Palette menu-->
 <div class="modal fade" id="PaletteMenu" tabindex="-1" role="dialog" aria-labelledby="PaletteMenuLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="PaletteMenuLabel">Export</h5>
+        <h5 class="modal-title" id="PaletteMenuLabel">Palette</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <pre><code id="PrintedBoard"></code></pre>
+      <div class="modal-body container">
+        <div class="row" id="palettelast"></div>
+        <div class="row" id="palettetile"></div>
+        <div class="row" id="palettetileset"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Copy</button>
+        <button type="button" class="btn btn-primary">Apply to Tile</button>
+        <button type="button" class="btn btn-primary">Apply to Tileset</button>
       </div>
     </div>
   </div>
 </div>
--->
+
 
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
