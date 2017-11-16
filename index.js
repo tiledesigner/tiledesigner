@@ -13,8 +13,8 @@ function Canvas(id){
       var a=[];
       var s;
       for (var i in array){
-        s=array.slice()
-        a.push(ArrayCopy(s[i]))
+        s=array.slice();
+        a.push(ArrayCopy(s[i]));
       }
       return a;  
     }
@@ -24,17 +24,17 @@ function Canvas(id){
       if(array1.length!=array2.length){
         return false;
       }
-      else
+      else{
       var test=true;
       for (var i=0;test&&(i<array1.length);i++){
-        test=test&&((typeof(array1[i])=="object"&&typeof(array2[i])=="object")&&(ArrayEqual(array1[i],array2[i])))||(test=array1[i]==array2[i])
+        test=test&&((typeof(array1[i])=="object"&&typeof(array2[i])=="object")&&(ArrayEqual(array1[i],array2[i])))||(test=array1[i]==array2[i]);
       }
-      return test;
+      return test;}
     }
     
   function MatrixMap(matrix,f){
     var m=ArrayCopy(matrix);
-    for(i in m){for (j in m[i]){m[i][j]=f(m[i][j])}}
+    for(var i in m){for (var j in m[i]){m[i][j]=f(m[i][j])}}
     return m;
   }
 
@@ -91,7 +91,7 @@ function Canvas(id){
   };
   
   this.AskColor=function(){
-    if(document.getElementById("ColorTransparency").checked){
+    if(document.getElementById("ColorTransparency").getAttribute("aria-pressed")==="true"){
         return "transparent";
       }
       else return document.getElementById("ColorPicker").value;
@@ -99,10 +99,10 @@ function Canvas(id){
   
   this.SetColor=function(color){
     if(color==="transparent"){
-      document.getElementById("ColorTransparency").checked=true;
+      document.getElementById("ColorTransparency").setAttribute("aria-pressed","true");
     }
     else{
-      document.getElementById("ColorTransparency").checked=false;
+      document.getElementById("ColorTransparency").setAttribute("aria-pressed","false");
       document.getElementById("ColorPicker").value=color;
     }
     return this;
@@ -379,13 +379,13 @@ function Canvas(id){
   
   HexToRGB=function(fullhex){
   var HexToNumber=function(hex){
-    var key=[["A","10"],["B","11"],["C","12"],["D","13"],["E","14"],["F","15"]];
+    var key=[["A","10"],["B","11"],["C","12"],["D","13"],["E","14"],["F","15"],["a","10"],["b","11"],["c","12"],["d","13"],["e","14"],["f","15"]];
     return Number(ReplaceReLi(hex[0],key))*16+Number(ReplaceReLi(hex[1],key));
     }
   var hex=fullhex.replace("#","");
   var color =[HexToNumber(hex[0]+hex[1]),
     HexToNumber(hex[2]+hex[3]),
-    HexToNumber(hex[4]+hex[5])]
+    HexToNumber(hex[4]+hex[5])];
   return color;
 };
   
@@ -464,34 +464,114 @@ function Canvas(id){
     this.palette={
       "tile":[],
       "last":[],
-      "tileset":[]
+      "tileset":[],
+      "Colorise":[0.2,0.4,0.6,0.7,0.8,0.9,1.1,1.2],
+      "Saturate":[0.2,0.4,0.6,0.8,1.25,1.5],
+      "Brighten":[0.2,0.4,0.6,0.8,1.25,1.5],
+      "function":function(){return null;}
     };
   
+  this.EvalColorFunction=function(target,value){
+    return function(color){
+      if(color==="transparent"){return "transparent"}else{
+      var code=target+"('"+color+"',"+value+")";
+      return eval(code);}}};
+  
+  this.PickColor=function(color){
+    this.SetColor(color);
+    this.UpdateHSV(color);
+    var t=this;
+    this.palette["function"]=function(){
+      t.MatrixLoad(MatrixMap(t.Matrix,function(x){return(color);}))};
+    return this;
+  };
+  
+  this.PickColorFunction=function(target,value){
+    var t=this;
+    var f=this.EvalColorFunction(target,value);
+    this.palette["function"]=function(){
+      t.MatrixLoad(MatrixMap(t.Matrix,f));};
+    return this;
+  };
+  
+  this.ApplyColorFunction=function(){
+    this.palette["function"]();
+    return this;
+  }
+
+  this.UpdateHSV=function(colour){
+    var operations=["Colorise","Saturate","Brighten"];
+    for(var i in operations){
+      var pal = document.getElementById("palette"+operations[i]);
+      while (pal.hasChildNodes()) {  
+        pal.removeChild(pal.firstChild);
+      }
+      for(var j in this.palette[operations[i]]){
+        var h=pal.innerHTML;
+        document.getElementById("palette"+operations[i]).innerHTML=h+this.ColorFunctionCardHTML(colour,operations[i],this.palette[operations[i]][j]);
+      }
+    };
+    return this;
+  }
+
   this.ColorSave=function(colour,targetlist){
       if(colour!="transparent"&&this.palette[targetlist].indexOf(colour)===-1){
         this.palette[targetlist].push(colour);
         var h=document.getElementById("palette"+targetlist).innerHTML;
-        document.getElementById("palette"+targetlist).innerHTML=h+this.ColorCardHTML(colour);
+        document.getElementById("palette"+targetlist).innerHTML=h+this.ColorCardHTML(colour,targetlist);
+      };
+      return this;
+    };
+    
+  this.ColorForget=function(colour,targetlist){
+      var p=this.palette[targetlist].indexOf(colour);
+      if(p!=-1){
+        this.palette[targetlist].splice(p);
+        var item = document.getElementById(targetlist+"-"+colour);
+        item.parentNode.removeChild(item);
       };
       return this;
     };
 
   this.MatrixColorsCapture=function(){
-    this.palette["tile"]=[];
+    t=this;
     MatrixMap(this.Matrix,function(x){
-      this.ColorSave(x,"tile");
-      this.ColorSave(x,"tileset");
+      t.ColorSave(x,"tile");
+      t.ColorSave(x,"tileset");
     })
     return this;
   };
   
   this.ColorCapture=function(){
     this.ColorSave(this.AskColor(),"last");
+    return this;
   }
   
-  this.ColorCardHTML=function(color){
-   return '<div class="card col" style="height:4rem;background-color:'+color+'" onclick="canvas.SetColor(\''+color+'\')"><div class="card-img-top" src="none" alt=" "></div><div class="card-block"><h4 class="card-title">'+color+'</h4> </div></div>'
+  this.ColorCardHTML=function(color,target){
+   return '\
+    <div class="card text-center" id="'+target+'-'+color+'">\
+      <img class="card-img-top" src="colorplaceholder.png" alt=" " style="height:4rem;background-color:'+color+'" onclick="canvas.PickColor(\''+color+'\')">\
+      <div class="card-block">\
+        <p class="card-title" style="color:'+color+'">'+color+'</p>\
+      </div>\
+      <button type="button" class="close" onclick="canvas.ColorForget(\''+color+'\',\''+target+'\')" aria-label="Forget-Color">\
+        <span aria-hidden="true">&times;</span>\
+      </button>\
+    </div>'
   }
+  
+  this.ColorFunctionCardHTML=function(basecolor,target,pvalue){
+    var color=this.EvalColorFunction(target,pvalue)(basecolor);
+     return '\
+    <div class="card text-center" id="'+target+'-'+pvalue+'-'+color+'">\
+       <img class="card-img-top" src="colorplaceholder.png" alt=" " style="height:4rem;background-color:'+color+'" onclick="canvas.PickColorFunction(\''+target+'\',\''+pvalue+'\')">\
+      <div class="card-block">\
+        <p class="card-title" style="color:'+color+'">'+pvalue+'</p>\
+        <p class="card-title" style="color:'+color+'">'+color+'</p>\
+      </div>\
+    </div>'
+  }
+  
   /*** Tile Set**/
   /*Tile Set
   

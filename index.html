@@ -23,37 +23,103 @@
     Your browser does not support the HTML5 canvas tag.</canvas>
     </div>
     <div id="Parameters" class="col">
-       <h3>Pick a colour:</h3>
-        <input id="ColorPicker" value="#A3EFA3" type="color" >
-        <input id="ColorTransparency" type="checkbox" >
-    
-    <div class="row">
-      <button type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
-      <button type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
 
-<button type="button" class="btn btn-info" onclick="canvas.MatrixFlipHorizontal()">Flip Horizontal</button>
-<button type="button" class="btn btn-info" onclick="canvas.MatrixFlipVertical()">Flip Vertical</button>
-<button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorHorizontal()">Mirror Horizontal</button>
-<button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorVertical()">Mirror Vertical</button>
+      <!-- Colour Palette menu-->
+      <button type="button" class="btn btn-dark" data-toggle="collapse" data-target="#PaletteMenu">Pick a Colour</button>
+      <div class="collapse" id="PaletteMenu">
+                <div class="container bg-light text-dark">
+          <div class="row" style="height: 100px">
+          <div><input id="ColorPicker" height="100%" value="#000000" type="color" ></div>
+          <button id="ColorTransparency" type="button" class="btn btn-outline-dark" data-toggle="button">
+                     Transparent?</button>
+        </div>
+          <ul class="nav nav-tabs" id="Palette" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="LastPicked-tab" data-toggle="tab" href="#LastPicked" role="tab" aria-controls="LastPicked" aria-selected="true">Last Picked</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="Tile-tab" data-toggle="tab" href="#Tile" role="tab" aria-controls="Tile" aria-selected="false">Current tile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="Tileset-tab" data-toggle="tab" href="#Tileset" role="tab" aria-controls="Tileset" aria-selected="false">Tileset</a>
+           </li>
+        </ul>
+          <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="LastPicked" role="tabpanel" aria-labelledby="LastPicked-tab">
+            <div class="container">
+            <div class="row" id="palettelast"></div>
+          </div>
+          </div>
+          <div class="tab-pane fade" id="Tile" role="tabpanel" aria-labelledby="Tile-tab">
+              <div class="container">
+                <div class="row" id="palettetile"></div>
+            </div>
+            </div>
+          <div class="tab-pane fade" id="Tileset" role="tabpanel" aria-labelledby="Tileset-tab">
+              <div class="container"><div class="row" id="palettetileset"></div>
+            </div>
+          </div>
+        </div>  
+          <ul class="nav nav-tabs" id="HSL" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="Hue-tab" data-toggle="tab" href="#Hue" role="tab" aria-controls="Hue" aria-selected="true">Hue</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="Saturation-tab" data-toggle="tab" href="#Saturation" role="tab" aria-controls="Saturation" aria-selected="false">Saturation</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="Brightness-tab" data-toggle="tab" href="#Brightness" role="tab" aria-controls="Brightness" aria-selected="false">Brightness</a>
+           </li>
+        </ul>
+          <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="Hue" role="tabpanel" aria-labelledby="Hue-tab">
+            <div class="container">
+            <div class="row" id="paletteColorise"></div>
+          </div>
+          </div>
+          <div class="tab-pane fade" id="Saturation" role="tabpanel" aria-labelledby="Saturation-tab">
+              <div class="container">
+                <div class="row" id="paletteSaturate"></div>
+            </div>
+            </div>
+          <div class="tab-pane fade" id="Brightness" role="tabpanel" aria-labelledby="Brightness-tab">
+              <div class="container"><div class="row" id="paletteBrighten"></div>
+            </div>
+            </div>
+         
+        </div>
+          <div class="footer">
+           <button type="button" class="btn btn-primary" onclick="canvas.ApplyColorFunction()">Apply to Tile</button>
+          <button type="button" class="btn btn-primary">Apply to Tileset</button>
+        </div>
+        </div>
 
-
-      <div class="input-group">
-        <span class="input-group-btn">
-          <button id="UpdateB" onclick="canvas.ChangeBoardSize()" class="btn btn-secondary" type="button">Change Board Size</button>
-      </span>
-      <input type="number" id="Nsquares" name="Range" value="5" min="0" max="100" class="form-control">
-    </div>
-
-      <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
-      <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+      </div>
       
-      <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#PaletteMenu">Palette</button>
-
       
+      <div class="row">
+        <button type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
+        <button type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
+
+        <button type="button" class="btn btn-info" onclick="canvas.MatrixFlipHorizontal()">Flip Horizontal</button>
+        <button type="button" class="btn btn-info" onclick="canvas.MatrixFlipVertical()">Flip Vertical</button>
+        <button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorHorizontal()">Mirror Horizontal</button>
+        <button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorVertical()">Mirror Vertical</button>
+
+
+        <div class="input-group">
+          <span class="input-group-btn">
+            <button id="UpdateB" onclick="canvas.ChangeBoardSize()" class="btn btn-secondary" type="button">Change Board Size</button>
+          </span>
+          <input type="number" id="Nsquares" name="Range" value="5" min="0" max="100" class="form-control">
+        </div>
+
+        <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
+        <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+
       </div>
       </div>
-    </div>
-  
+
     <div id="TileSet">
       <h2>Tile set</h2>
       <div></div>
@@ -93,29 +159,6 @@
   </div>
 </div>
 
-<!-- Colour Palette menu-->
-<div class="modal fade" id="PaletteMenu" tabindex="-1" role="dialog" aria-labelledby="PaletteMenuLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="PaletteMenuLabel">Palette</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body container">
-        <div class="row" id="palettelast"></div>
-        <div class="row" id="palettetile"></div>
-        <div class="row" id="palettetileset"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Apply to Tile</button>
-        <button type="button" class="btn btn-primary">Apply to Tileset</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 
