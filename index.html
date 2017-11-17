@@ -13,14 +13,17 @@
   <div class="container">
     <div id="Intro">
   <h1>Tile Maker</h1>
-  <p>This page is a tile maker - to create tiles for videogames.</p>
-   <p>At the moment, this is compatible with <a href="https://www.puzzlescript.net">puzzlescript</a>.</p>
+  <p>This page is a tile maker, tile editor or tile designer - to create tiles for videogames.</p>
+   <p>At the moment, this is compatible with the <a href="https://www.puzzlescript.net">puzzlescript</a> editor.</p>
   <p>Click on each individual pixel in the tile board below to assign the chosen colour. Click again to recover the previous colour.</p>
 </div>
     <div id="TileMaker" class="row">
     <div id="TileDrawer" class="col">
+      <input type="text" class="form-control" id="TileTitle" placeholder="MyTile">
      <canvas id="TileEditor" onmousedown="canvas.ClickTile(event)" width="300" height="300" style="border:1px solid #d3d3d3;">
-    Your browser does not support the HTML5 canvas tag.</canvas>
+    As your browser does not support the HTML5 canvas tag, this tile editor won't work...</canvas>
+    <button type="button" class="btn btn-primary" onclick="canvas.TileSave()">Save Tile</button>
+    <button type="button" class="btn btn-primary" onclick="canvas.TileLoad()">Load Tile</button>
     </div>
     <div id="Parameters" class="col">
 
@@ -101,10 +104,24 @@
         <button type="button" class="btn btn-warning" onclick="canvas.Undo()">Undo</button>
         <button type="button" class="btn btn-warning" onclick="canvas.Redo()">Redo</button>
 
-        <button type="button" class="btn btn-info" onclick="canvas.MatrixFlipHorizontal()">Flip Horizontal</button>
-        <button type="button" class="btn btn-info" onclick="canvas.MatrixFlipVertical()">Flip Vertical</button>
-        <button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorHorizontal()">Mirror Horizontal</button>
-        <button type="button" class="btn btn-info" onclick="canvas.MatrixMirrorVertical()">Mirror Vertical</button>
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropFlip" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Flip
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropFlip">
+           <button type="button" class="btn dropdown-item" onclick="canvas.MatrixFlipHorizontal()">Horizontal</button>
+          <button type="button" class="btn dropdown-item" onclick="canvas.MatrixFlipVertical()">Vertical</button>
+        </div>
+      </div>
+      
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropMirror" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Mirror
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropMirror">
+        <button type="button" class="btn dropdown-item" onclick="canvas.MatrixMirrorHorizontal()">Horizontal</button>
+        <button type="button" class="btn dropdown-item" onclick="canvas.MatrixMirrorVertical()">Vertical</button>        </div>
+      </div>
 
 
         <div class="input-group">
@@ -115,15 +132,12 @@
         </div>
 
         <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
-        <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Print board</button>
+        <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Export</button>
 
       </div>
       </div>
-
-    <div id="TileSet">
-      <h2>Tile set</h2>
-      <div></div>
-     
+    <h2>Tile set</h2>
+    <div id="TileSet" class="row">
     </div>
     
     <div id="Footer">
@@ -133,9 +147,10 @@
     </div>
   </div>
 
-
+  
 
 <!-- Export menu -->
+
 <div class="modal fade" id="ExportMenu" tabindex="-1" role="dialog" aria-labelledby="ExportMenuLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -145,12 +160,40 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+      
       <div class="modal-body">
+          <ul class="nav nav-tabs" id="Export" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="TileEx-tab" data-toggle="tab" href="#TileEx" role="tab" aria-controls="TileEx" aria-selected="true">Tile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="TilesetEx-tab" data-toggle="tab" href="#TilesetEx" role="tab" aria-controls="TilesetEx" aria-selected="false">Tileset</a>
+          </li>
+           </ul>
+          <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="TileEx" role="tabpanel" aria-labelledby="TileEx-tab">
+            <div class="container">
+
         <pre><code id="PrintedBoard"></code></pre>
-      </div>
-      <div class="modal-body">
-        <img id="ImagedBoard">
-      </div>
+
+        <img id="ImagedBoard" height="100px">
+
+
+          </div>
+          </div>
+          <div class="tab-pane fade" id="TilesetEx" role="tabpanel" aria-labelledby="TilesetEx-tab">
+              <div class="container">
+
+          </div>
+          </div>
+          
+        </div>
+        </div>
+      
+
+      
+      
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary">Copy</button>

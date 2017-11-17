@@ -79,8 +79,19 @@ function Canvas(id){
   }
   /*** Tile Board (Canvas) functions ***/
 
+  this.AskTitle=function(){
+    var title=this.ParseTileTitle(document.getElementById("TileTitle").value);
+    if(title===""){title=this.ParseTileTitle(document.getElementById("TileTitle").placeholder);}
+    return title;
+  };
+  
+  this.TitleLoad=function(name){
+    document.getElementById("TileTitle").value=name;
+    return this;
+  };
+
   this.AskSize=function(){
-    return Number(document.getElementById("Nsquares").value)};
+    return Number(document.getElementById("Nsquares").value);};
   
   this.AskSizeL=function(){
     var d=document.getElementById(id);
@@ -148,13 +159,19 @@ function Canvas(id){
   this.UpdatedTileLastColor='transparent';
   this.UpdatedTileLastXY=[0,0];
 
-  this.UpdateTile=function(x,y,color){
+  this.UpdateTileClick=function(x,y,color){
     if(ArrayEqual([x,y],this.UpdatedTileLastXY)&&(color==this.MatrixRead(x,y))){
       var c=this.UpdatedTileLastColor;
       this.UpdatedTileLastColor=this.MatrixRead(x,y);
       this.UpdatedTileLastXY=[x,y];
       this.DrawPixel(x,y,c);
       this.MatrixSet(x,y,c);
+    }
+    else if(color==this.MatrixRead(x,y)){
+      this.UpdatedTileLastColor=this.MatrixRead(x,y);
+      this.UpdatedTileLastXY=[x,y];
+      this.DrawPixel(x,y,"transparent");
+      this.MatrixSet(x,y,"transparent");
     }
     else{
       this.UpdatedTileLastColor=this.MatrixRead(x,y);
@@ -165,22 +182,44 @@ function Canvas(id){
     }
   };
   
+  this.UpdateTile=function(x,y,color){
+      this.DrawPixel(x,y,color);
+      this.MatrixSet(x,y,color);
+      return this;
+  };
+  
   this.ClickTile= function(event){
     var l=this.AskSizeL();
     var x =event.offsetX;
     var y =event.offsetY;
     x=1+(x-x%l)/l;
     y=1+(y-y%l)/l;
-    this.UpdateTile(x,y,this.AskColor());
+    this.UpdateTileClick(x,y,this.AskColor());
     this.ColorCapture();
     this.UndoCapture();
   return this;
   };
   
-  this.PrintBoard=function(){
-    document.getElementById("PrintedBoard").innerHTML = this.MatrixParse();
-    document.getElementById("ImagedBoard").src = this.MatrixImage();
+  this.ParseTileTitle=function(title){
+    var inclusions="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var exclusions=[];
+    for(var i in inclusions){
+      exclusions.push([inclusions[i],""])
+    }
+    inclusions=ReplaceReLi(title,exclusions);
+    exclusions=[];
+    for(var j in inclusions){
+      exclusions.push([inclusions[j],""])
+    }
+    return ReplaceReLi(title,exclusions);
+  }
 
+  this.PrintBoard=function(){
+    var title=this.AskTitle();
+    var code=title+"\n"+this.MatrixParse()
+    document.getElementById("PrintedBoard").innerHTML=code
+    document.getElementById("ImagedBoard").src = this.MatrixImage();
+    return this;
   };
   
   this.ClearBoard=function(){
@@ -213,12 +252,6 @@ function Canvas(id){
     this.UndoCapture();
     return this;  
   };
-  
-  /*
-  this.Editable=true;
-  this.EditDisable=function(){this.Editable=false}
-  this.EditEnable=function(){this.Editable=true}
-  */
   /*** Undo & Redo***/
 
   this.UndoCapture=function(){
@@ -276,7 +309,6 @@ function Canvas(id){
 
       return this;
     };
-  
   
   this.MatrixLoad=function(matrix){
     this.Matrix=ArrayCopy(matrix);
@@ -342,7 +374,21 @@ function Canvas(id){
       }
       n=n.join("\n");
       text=text+colorlist.join(" ")+"\n"+n;
+      
+      if(colorlist.length===1){text=colorlist};//simplified version for unicoloureds
+      
     return(text);
+    };
+    
+  this.MatrixUnparse=function(colours,matri){
+      var colourlist=colours.replace(/\s$/,"").split(" ");
+      var colourmatrix=ReplaceRe(matri," ","");
+      var matrix=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+      for (var i in matrix){
+        for (j in matrix[i]){
+        matrix[i][j]=colourlist[colourmatrix[Number(i)*5+Number(j)]];
+      };};
+      return matrix;
     };
   /*** Matrix Transformations ***/
     
@@ -360,7 +406,7 @@ function Canvas(id){
       return(this)
     }
     
-    this.MatrixMirrorVertical=function(){
+    this.MatrixMirrorHorizontal=function(){
       m=ArrayCopy(this.Matrix);
       var l=m[0].length;
       for(var i in m){for(var j in m[i]){m[i][j]=m[i][l-1-j]}}
@@ -368,7 +414,7 @@ function Canvas(id){
       return(this)
     }
     
-    this.MatrixMirrorHorizontal=function(){
+    this.MatrixMirrorVertical=function(){
       m=ArrayCopy(this.Matrix);
       var l=m.length;
       for(var i in m){m[i]=m[l-1-i]}
@@ -499,6 +545,17 @@ function Canvas(id){
     return this;
   }
 
+  this.AppendChild=function(id,childhtml){
+    var h=document.getElementById(id).innerHTML;
+    document.getElementById(id).innerHTML=h+childhtml;
+    return this;
+  }
+
+  this.UpdateChildren=function(id,childhtml){
+    document.getElementById(id).innerHTML=childhtml;
+    return this;
+  }
+
   this.UpdateHSV=function(colour){
     var operations=["Colorise","Saturate","Brighten"];
     for(var i in operations){
@@ -507,8 +564,7 @@ function Canvas(id){
         pal.removeChild(pal.firstChild);
       }
       for(var j in this.palette[operations[i]]){
-        var h=pal.innerHTML;
-        document.getElementById("palette"+operations[i]).innerHTML=h+this.ColorFunctionCardHTML(colour,operations[i],this.palette[operations[i]][j]);
+        this.AppendChild("palette"+operations[i],this.ColorFunctionCardHTML(colour,operations[i],this.palette[operations[i]][j]));
       }
     };
     return this;
@@ -517,8 +573,7 @@ function Canvas(id){
   this.ColorSave=function(colour,targetlist){
       if(colour!="transparent"&&this.palette[targetlist].indexOf(colour)===-1){
         this.palette[targetlist].push(colour);
-        var h=document.getElementById("palette"+targetlist).innerHTML;
-        document.getElementById("palette"+targetlist).innerHTML=h+this.ColorCardHTML(colour,targetlist);
+        this.AppendChild("palette"+targetlist,this.ColorCardHTML(colour,targetlist));
       };
       return this;
     };
@@ -526,7 +581,7 @@ function Canvas(id){
   this.ColorForget=function(colour,targetlist){
       var p=this.palette[targetlist].indexOf(colour);
       if(p!=-1){
-        this.palette[targetlist].splice(p);
+        this.palette[targetlist].splice(p,1);
         var item = document.getElementById(targetlist+"-"+colour);
         item.parentNode.removeChild(item);
       };
@@ -571,32 +626,197 @@ function Canvas(id){
       </div>\
     </div>'
   }
-  
   /*** Tile Set**/
-  /*Tile Set
+
+  this.Tileset={
+    tiles:[],
+    names:[],
+    selected:[],
+    cardshtml:[]
+  };
+
+  Increment=function(name,names){
+    var n=name.replace(/(\d)+$/,"");
+    var i=name.replace(n,"");
+    if(i===""){ 
+      n=n+"2";
+    }
+    else {
+      n=n+String(Number(i)+1);
+    };
+    while(names.indexOf(n)>=0){
+       n=Increment(n,names);
+    }
+     return n;
+  };
+
+  this.TilesetAppend=function(matrix,name,src){
+    var n=name;
+    if(this.Tileset.names.indexOf(name)>=0){ n=Increment(name,this.Tileset.names)};
+      this.Tileset.tiles.push(matrix);
+      this.Tileset.names.push(n);
+      this.Tileset.selected.push(false);
+      var html=this.TileCardHTML(n,src);
+      this.Tileset.cardshtml.push(html);
+      this.AppendChild("TileSet",html);
+      return this;
+  };
   
-  this.SaveTile=function(){
-    this.TilesetAppend(this.Matrix);
-    this.TilesetUpdate();
+  this.TilesetRemove=function(){
+    var l=this.Tileset.selected.length-1;
+    for (var i=l;i>=0;i--){
+      if(this.Tileset.selected[i]===true){
+        this.TileDelete(i);
+      }
+    }
+    return this;
+  };
+  
+  this.TileDelete=function(i){
+    this.Tileset.tiles.splice(i,1);
+    this.Tileset.names.splice(i,1);
+    this.Tileset.selected.splice(i,1);
+    this.Tileset.cardshtml.splice(i,1);
+    this.UpdateChildren("TileSet",this.Tileset.cardshtml.join())
+    return this;
+  };
+  
+  this.TilePositionInSet=function(name){
+    var t=true;
+    var i=0;
+    var o=-1;
+    while(t&&i<this.Tileset.names.length){
+      if(this.Tileset.names[i]===name){
+        o=i;
+        t=false;
+      }
+      i++;
+    }
+    return o;
+  }
+  
+  this.TileDeleteByName=function(name){
+    var i=this.TilePositionInSet(name);
+    if(i>=0){this.TileDelete(i)};
     return this;
   }
   
-  this.Tileset=[];
-  this.TileIndex=0;
+  this.ToggleClass=function(id,classfeature){
+    var e=document.getElementById(id);
+    var c=e.getAttribute("class");
+    d=c.replace(classfeature,"");
+    if(c===d){d=c+" "+classfeature}
+    e.setAttribute("class",d);
+    console.log(c)
+    console.log(d)
+    return this;
+  };
+
+  this.TileToggleByName=function(name){
+    var i=this.TilePositionInSet(name);
+    if(i>=0){
+      this.Tileset.selected[i]=!this.Tileset.selected[i];
+    };
+    this.ToggleClass("tile-"+this.Tileset.names[i],"active");
+    return this;
+  }
+
+  this.TilesetApply=function(f){
+    var l=this.Tileset.selected.length-1;
+    for (var i=l;i>=0;i--){
+      if(this.Tileset.selected[i]){
+        this.Tileset.tiles[i]=f(this.Tileset.tiles[i]);
+      }
+    }
+    return this;
+  };
   
+  this.TilesetParse=function(code){
+
+    var IsolateObjects=function(code){
+      var c=ReplaceReLi(code,[
+        [/(.+)OBJECTS(.+)LEGEND(.+)/, "$2"],
+        ["=",""],
+        [/(.+)\((.+)\)(.+)/, "$1$3"],
+        [/((\n)|(\t)|(\r)|(\s))+/," "],
+        ["  "," "],
+        [/^\s/,""]
+      ]);
+      return c;
+    }
+
+    var NextItemF=function(token){
+      return function(code){
+        var titletoken=token;
+        var title = code.replace(titletoken,"$1");
+        return [title,code.replace(titletoken,"$2")];
+      };
+    };
+
+    var NextTitle=NextItemF(/^((?:\w|\d)+)\s(.+)/);
+    var NextColors=NextItemF(/^((?:(?:transparent)|(?:\#(?:[a-f]|[0-9]){6}))\s)+(.+)/i);
+    var NextBlock=NextItemF(/^((?:(?:(?:\.|[0-9]){5})\s){5})+(.+)/i);
   
+    var NextTile=function(code){
+      var c=NextTitle(code);
+      var title=c[0];
+      c=NextColors(c[1]);
+      var colors=c[0];
+      var d=NextBlock(c[1]);
+      var block="00000 00000 00000 00000 00000";
+      if(d[0].replace(/[a-z]|[A-Z]/,"")===d[0]){
+        block=d[0]
+      }
+      return [[title,colors,block],d[1]];
+    };
+
+    var c=IsolateObjects(code);
+
+    var tileset=[];
+    var tile=NextTile(c);
+    var tileold=[];
+    while (!ArrayEqual(tileold,tile[0])){
+      tileset.push([tile[0][0],this.MatrixUnparse(tile[0][1],tile[0][2])]);
+      tileold=tile[0];
+      tile=NextTile(tile[1]);
+    }
+    tileset.pop();
+    return tileset
+  };
+
+  this.TileSave=function(){
+    this.TilesetAppend(ArrayCopy(this.Matrix),this.AskTitle(),this.MatrixImage());
+    //Update tilesetcolors
+    return this;
+  }
+    
+  this.TileLoad=function(){
+    var i=this.Tileset.selected.indexOf(true);
+    if(i>=0){
+      this.MatrixLoad(this.Tileset.tiles[i]);
+      this.TitleLoad(this.Tileset.names[i]);
+    }
+    return this;
+  }
+
+  this.TileCardHTML=function(name,src){
+    return '\
+    <div class="card text-center btn btn-secondary" id="tile-'+name+'">\
+      <img class="card-img-top" src="'+src+'" style="height:50px" onclick="canvas.TileToggleByName(\''+name+'\')">\
+      <div class="card-block">\
+        <p class="card-title">'+name+'</p>\
+      </div>\
+      <button type="button" class="close" onclick="canvas.TileDeleteByName(\''+name+'\')" aria-label="Forget-Tile">\
+        <span aria-hidden="true">&times;</span>\
+      </button>\
+    </div>'
+  };
+
   this.MatrixImage=function() {
-	  var image = new Image();
-	  image.src = c.toDataURL("image/png");
-	  return image;
+	  var imagedata = c.toDataURL();
+	  return imagedata;
   }
-  
-  this.TilesetUpdate=function(){
-    this.Tileset.push(this.Matrix);
-    TileCard(this.Matrix);
-    return this;
-  };*/
-  
+
   this.MatrixReset();
 
 }
