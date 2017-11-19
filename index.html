@@ -24,6 +24,10 @@
     As your browser does not support the HTML5 canvas tag, this tile editor won't work...</canvas>
     <button type="button" class="btn btn-primary" onclick="canvas.TileSave()">Save Tile</button>
     <button type="button" class="btn btn-primary" onclick="canvas.TileLoad()">Load Tile</button>
+    <textarea class="form-control" id="TilesetCodeI">
+     Overwrite puzzlescript code here.
+    </textarea>
+    <button type="button" class="btn btn-primary" onclick="canvas.TilesetImport()">Load Tileset</button>
     </div>
     <div id="Parameters" class="col">
 
@@ -132,7 +136,7 @@
         </div>
 
         <button id="ClearB" type="button" class="btn btn-danger" onclick="canvas.ClearBoard()">Clear board</button>
-        <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.PrintBoard()">Export</button>
+        <button id="PrintB" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ExportMenu" onclick="canvas.Export()">Export</button>
 
       </div>
       </div>
@@ -142,8 +146,9 @@
     
     <div id="Footer">
       <h2>Credits</h2>
-      <p>Last version: November 2017.</p>
-      <p> Programmed in HTML and Javascript within <a href="https://repl.it/">repl</a>, styled with the <a href="https://getbootstrap.com">Bootstrap library</a>.</p>
+        <p> Programmed in HTML and Javascript within the <a href="https://repl.it/">repl</a> inteface. Styled with the <a href="https://getbootstrap.com">Bootstrap library</a>. Other useful tools include the <a href="https://regexr.com/">RegExr</a> regular expression checker.
+      </p>
+      <p>(c) November 2017</p>
     </div>
   </div>
 
@@ -174,16 +179,15 @@
           <div class="tab-pane fade show active" id="TileEx" role="tabpanel" aria-labelledby="TileEx-tab">
             <div class="container">
 
-        <pre><code id="PrintedBoard"></code></pre>
-
-        <img id="ImagedBoard" height="100px">
+        <pre><code id="PrintedTile"></code></pre>
+        <img id="DepictedTile" height="100px">
 
 
           </div>
           </div>
           <div class="tab-pane fade" id="TilesetEx" role="tabpanel" aria-labelledby="TilesetEx-tab">
               <div class="container">
-
+        <pre><code id="PrintedTileset"></code></pre>
           </div>
           </div>
           
